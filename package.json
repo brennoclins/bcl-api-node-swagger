@@ -4,7 +4,7 @@
   "description": "Autor: Brenno C. Lins",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx src/secrer.ts"
   },
   "repository": {
     "type": "git",
