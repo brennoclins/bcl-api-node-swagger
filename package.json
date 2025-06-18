@@ -4,14 +4,14 @@
   "description": "Autor: Brenno C. Lins",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx src/secrer.ts"
+    "dev": "tsx src/server.ts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/brennoclins/bcl-api-node-swagger.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Brenno C. Lins",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/brennoclins/bcl-api-node-swagger/issues"
