@@ -54,5 +54,5 @@ export async function routes(app: FastifyTypeInstance){
     users.push(newUser)
     return reply.status(201).send(newUser)
     })
-    
+
 }
