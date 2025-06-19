@@ -19,7 +19,7 @@ const users: IUsers[] = [
 const userSchema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.string().email()
+  email: z.string()
 })
 
 const createUserSchema = z.object({
@@ -35,8 +35,8 @@ export async function routes(app: FastifyTypeInstance){
             tags: ['users'],
             description: 'List users',
             response: {
-            200: z.array(userSchema)
-    }
+                200: z.array(userSchema)
+            }
         },
     }, () => {
         return users
@@ -48,8 +48,12 @@ export async function routes(app: FastifyTypeInstance){
             description: 'Create a new user',
             body: createUserSchema,
             response: {
-                201: z.null().describe('User created')
+                201: userSchema,
+                400: z.object({
+                    error: z.string().describe('Validation error')
+                })
             }
+
         },
     }, async (request, reply) => {
         const { name, email } = request.body
