@@ -1,11 +1,14 @@
 import  { fastify } from "fastify"
 import  { fastifyCors }  from "@fastify/cors"
-import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod"
-import {fastifySwagger} from "@fastify/swagger"
-import fastifySwaggerUi from "@fastify/swagger-ui"
+import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from "fastify-type-provider-zod"
+import { fastifySwagger } from "@fastify/swagger"
+import { fastifySwaggerUi } from "@fastify/swagger-ui"
+import { routes } from "./routes"
+import { ZodTypeProvider } from "fastify-type-provider-zod"
 
+const PORT = Number(process.env.PORT) || 3333
 
-const app = fastify()
+const app = fastify().withTypeProvider<ZodTypeProvider>()
 
 // Faz a validação dos dados
 app.setValidatorCompiler(validatorCompiler)
@@ -19,8 +22,10 @@ app.register(fastifySwagger, {
         info: {
             title: 'Typed API',
             version: '1.0.0'
-        }
-    }
+        },
+        
+    },
+    transform: jsonSchemaTransform,
 })
 
 app.register(fastifySwaggerUi, {
@@ -28,11 +33,15 @@ app.register(fastifySwaggerUi, {
 })
 
 // rotas
-app.get('/', () => {
-    return 'Olá Mundo!'
-})
+app.register(routes)
 
-app.listen({ port: 3333 }).then(() => {
-console.log(`Servidor rodando em http://localhost:3333`);
 
-})
+
+app.listen({ port: PORT , host: '0.0.0.0' })
+  .then(() => {
+    console.log('Servidor rodando em http://localhost:3333')
+  })
+  .catch((err) => {
+    app.log.error(err)
+    process.exit(1)
+  })
