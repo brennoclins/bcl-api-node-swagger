@@ -18,7 +18,7 @@ export const errorResponseSchema = z.object({
 //
 export const validationErrorSchema = z.object({
   error: z.object({
-    fieldErrors: z.record(z.array(z.string())),
     formErrors: z.array(z.string()),
+    fieldErrors: z.record(z.array(z.string()).optional()),
   }),
 });

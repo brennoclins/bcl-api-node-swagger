@@ -11,5 +11,13 @@ const users: IUser[] = [
 
 export const userRepository = {
   findAll: (): IUser[] => users,
-  findById: (id: string): IUser | undefined => users.find((u) => u.id === id),
+  findById: (id: string): IUser | null => {
+    const user = users.find((u) => u.id === id);
+    return user || null;
+  },
+  create: (userData: Omit<IUser, 'id'>): IUser => {
+    const newUser = { id: randomUUID(), ...userData };
+    users.push(newUser);
+    return newUser;
+  },
 };

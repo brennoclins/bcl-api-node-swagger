@@ -1,58 +1,58 @@
-import { z } from "zod";
-import type { FastifyTypeInstance } from "./types";
-import { randomUUID } from "node:crypto";
-import { createUserSchema, errorResponseSchema, userSchema, validationErrorSchema } from "./schemas/userSchemas";
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+import { userRepository } from './repositories/userRepository';
+import {
+  createUserSchema,
+  errorResponseSchema,
+  userSchema,
+  validationErrorSchema,
+} from './schemas/userSchemas';
+import { userService } from './services/userService';
+import type { FastifyTypeInstance } from './types';
 
-interface IUsers {
-    id: string
-    name: string
-    email: string
-}
-
-const users: IUsers[] = [
+export async function routes(app: FastifyTypeInstance) {
+  app.get(
+    '/users',
     {
-        id: randomUUID(),
-        name: 'Brenno',
-        email: 'b@bcl.com',
-    }
-]
-
-export async function routes(app: FastifyTypeInstance){
-    app.get('/users', {
-        schema: {
-            tags: ['users'],
-            description: 'List users',
-            response: {
-                200: z.array(userSchema)
-            }
+      schema: {
+        tags: ['users'],
+        description: 'List users',
+        response: {
+          200: z.array(userSchema),
+          500: errorResponseSchema,
         },
-    }, () => {
-        return users
-    }),
+      },
+    },
+    async () => {
+      return userRepository.findAll();
+    },
+  );
 
-   app.post('/users', {
-    schema: {
+  app.post(
+    '/users',
+    {
+      schema: {
         tags: ['users'],
         description: 'Create a new user',
         body: createUserSchema,
         response: {
-        201: userSchema,
-        400: validationErrorSchema,
-        500: errorResponseSchema
+          201: userSchema,
+          400: validationErrorSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const newUser = await userService.createUser(request.body);
+        return reply.status(201).send(newUser);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return reply.status(400).send({ error: error.flatten() });
         }
-    }
-    }, async (request, reply) => {
-    const parsed = createUserSchema.safeParse(request.body)
-
-    if (!parsed.success) {
-        return reply.status(400).send({ error: parsed.error.flatten() })
-    }
-
-    const { name, email } = parsed.data
-    const newUser = { id: randomUUID(), name, email }
-
-    users.push(newUser)
-    return reply.status(201).send(newUser)
-    })
-
+        app.log.error(error);
+        return reply.status(500).send({ error: 'Internal server error' });
+      }
+    },
+  );
 }
