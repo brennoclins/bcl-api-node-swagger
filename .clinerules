@@ -1,0 +1,12 @@
+# Projeto: API REST com Fastify, TypeScript, Zod e Swagger
+
+- Use TypeScript com tipagem forte
+- Use Fastify v5 com Swagger documentado
+- Valide dados com Zod em todas as rotas
+- Organize o projeto em camadas (routes, schemas, services, etc.)
+- Use BiomeJS para lint e formatação
+- Adicione JSDoc em funções públicas
+- Escreva testes com Vitest
+- Ao criar código, siga o padrão do projeto atual
+- Não instale bibliotecas sem minha permissão
+- Prefira modularização e legibilidade a excesso de abstração
