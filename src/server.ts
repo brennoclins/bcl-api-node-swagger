@@ -12,43 +12,39 @@ import { routes } from './routes';
 
 const PORT = Number(process.env.PORT) || 3333;
 
-export const build = () => {
-  const app = fastify().withTypeProvider<ZodTypeProvider>();
+const app = fastify().withTypeProvider<ZodTypeProvider>();
 
-  // Configurações do Fastify
-  app.setValidatorCompiler(validatorCompiler);
-  app.setSerializerCompiler(serializerCompiler);
+// Configurações do Fastify
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
 
-  // Plugins
-  app.register(fastifyCors, { origin: '*' });
-  app.register(fastifySwagger, {
-    openapi: {
-      info: {
-        title: 'Typed API',
-        version: '1.0.0',
-      },
+// Plugins
+app.register(fastifyCors, { origin: '*' });
+app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'Typed API',
+      version: '1.0.0',
     },
-    transform: jsonSchemaTransform,
-  });
-  app.register(fastifySwaggerUi, {
-    routePrefix: '/docs',
-  });
+  },
+  transform: jsonSchemaTransform,
+});
+app.register(fastifySwaggerUi, {
+  routePrefix: '/docs',
+});
 
-  // Rotas
-  app.register(routes);
+// Rotas
+app.register(routes);
 
-  // Inicialização condicional do servidor
-  if (process.env.NODE_ENV !== 'test') {
-    app
-      .listen({ port: PORT, host: '0.0.0.0' })
-      .then(() => {
-        console.log('Servidor rodando em http://localhost:3333');
-      })
-      .catch((err) => {
-        app.log.error(err);
-        process.exit(1);
-      });
-  }
-
-  return app;
-};
+// Inicialização condicional do servidor
+if (process.env.NODE_ENV !== 'test') {
+  app
+    .listen({ port: PORT, host: '0.0.0.0' })
+    .then(() => {
+      console.log('Servidor rodando em http://localhost:3333');
+    })
+    .catch((err) => {
+      app.log.error(err);
+      process.exit(1);
+    });
+}
