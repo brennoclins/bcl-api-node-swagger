@@ -7,7 +7,10 @@
     "dev": "tsx watch src/server.ts",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "check": "biome check ."
+    "check": "biome check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "repository": {
     "type": "git",
@@ -31,7 +34,9 @@
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
     "@types/node": "^24.0.3",
+    "@vitest/ui": "^3.2.4",
     "tsx": "^4.20.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   }
 }
