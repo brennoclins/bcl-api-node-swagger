@@ -33,6 +33,10 @@ app.register(fastifySwaggerUi, {
   routePrefix: '/docs',
 });
 
+app.register(require('@fastify/jwt'), {
+  secret: process.env.JWT_SECRET || 'supersecret', // Use dotenv se preferir
+});
+
 // Rotas
 app.register(routes);
 
