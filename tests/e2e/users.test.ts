@@ -11,12 +11,17 @@ describe('POST /users', () => {
     email: 'e2e@teste.com',
   };
 
+  let token: string;
+
   beforeAll(async () => {
     await testApp.ready();
     vi.spyOn(userRepository, 'create').mockImplementation((data: Omit<IUser, 'id'>) => ({
       id: randomUUID(),
       ...data,
     }));
+
+    // Gera um token válido pare os testes
+    token = testApp.jwt.sign({ sub: 'user123', name: 'Tester' }, { expiresIn: '1h' });
   });
 
   afterAll(async () => {
@@ -28,6 +33,7 @@ describe('POST /users', () => {
     const response = await testApp.inject({
       method: 'POST',
       url: '/users',
+      headers: { authorization: `Bearer ${token}` },
       payload: mockUser,
     });
 
@@ -42,6 +48,7 @@ describe('POST /users', () => {
     const response = await testApp.inject({
       method: 'POST',
       url: '/users',
+      headers: { authorization: `Bearer ${token}` },
       payload: { email: 'sem@nome.com' },
     });
 
@@ -53,6 +60,7 @@ describe('POST /users', () => {
     const response = await testApp.inject({
       method: 'POST',
       url: '/users',
+      headers: { authorization: `Bearer ${token}` },
       payload: { ...mockUser, email: 'email-invalido' },
     });
 
@@ -64,6 +72,7 @@ describe('POST /users', () => {
     const response = await testApp.inject({
       method: 'POST',
       url: '/users',
+      headers: { authorization: `Bearer ${token}` },
       payload: { ...mockUser, idade: 30 },
     });
 

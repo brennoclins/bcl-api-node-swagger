@@ -15,6 +15,10 @@ export const userRepository = {
     const user = users.find((u) => u.id === id);
     return user || null;
   },
+  findByEmail: (email: string): IUser | null => {
+    const user = users.find((u) => u.email === email);
+    return user || null;
+  },
   create: (userData: Omit<IUser, 'id'>): IUser => {
     const newUser = { id: randomUUID(), ...userData };
     users.push(newUser);

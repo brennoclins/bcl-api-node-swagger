@@ -75,6 +75,15 @@ export function build() {
         title: 'Typed API',
         version: '1.0.0',
       },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
     },
     transform: jsonSchemaTransform,
   });
@@ -84,6 +93,14 @@ export function build() {
 
   app.register(fastifyJwt, {
     secret: process.env.JWT_SECRET || 'supersecret', // Use dotenv se preferir
+  });
+
+  app.decorate('authenticate', async (request: any, reply: any) => {
+    try {
+      await request.jwtVerify();
+    } catch (err) {
+      reply.send(err);
+    }
   });
 
   // Rotas

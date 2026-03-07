@@ -7,6 +7,8 @@ import type {
 } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 
+import '@fastify/jwt';
+
 export type FastifyTypeInstance = FastifyInstance<
   RawServerDefault,
   RawRequestDefaultExpression,
@@ -14,6 +16,19 @@ export type FastifyTypeInstance = FastifyInstance<
   FastifyBaseLogger,
   ZodTypeProvider
 >;
+
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    payload: { sub: string; name: string };
+    user: { sub: string; name: string };
+  }
+}
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    authenticate: any;
+  }
+}
 
 export interface IUser {
   id: string;
