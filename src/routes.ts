@@ -33,7 +33,7 @@ export async function routes(app: FastifyTypeInstance) {
       schema: {
         tags: ['users'],
         description: 'Create a new user',
-        body: createUserSchema,
+        body: createUserSchema.strict(),
         response: {
           201: userSchema,
           400: validationErrorSchema,
@@ -42,13 +42,12 @@ export async function routes(app: FastifyTypeInstance) {
       },
     },
     async (request, reply) => {
+      // A validação do Zod é tratada automaticamente pelo Fastify antes de chegar aqui.
+      // Este try/catch lida com possíveis erros da camada de serviço (ex: falha no banco de dados).
       try {
         const newUser = await userService.createUser(request.body);
         return reply.status(201).send(newUser);
       } catch (error) {
-        if (error instanceof z.ZodError) {
-          return reply.status(400).send({ error: error.flatten() });
-        }
         app.log.error(error);
         return reply.status(500).send({ error: 'Internal server error' });
       }

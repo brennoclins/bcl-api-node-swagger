@@ -1,71 +1,46 @@
-import { describe, expect, test, vi, afterEach } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { userRepository } from '../../src/repositories/userRepository';
 import { userService } from '../../src/services/userService';
-import type { IUser } from '../../src/types';
 
 vi.mock('../../src/repositories/userRepository', () => ({
   userRepository: {
-    findAll: vi.fn(),
-    findById: vi.fn(),
     create: vi.fn(),
   },
 }));
 
-describe('User Service — createUser', () => {
+describe('User Service - createUser', () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  const createMockUser = (overrides?: Partial<IUser>) => ({
+  const mockUserData = {
     name: 'Usuário Teste',
     email: 'teste@example.com',
-    password: 'senha123',
-    ...overrides,
+  };
+
+  test('deve criar um usuário e retorná-lo com sucesso', async () => {
+    const createdUser = { id: 'uuid123', ...mockUserData };
+    vi.mocked(userRepository.create).mockResolvedValue(createdUser);
+
+    const result = await userService.createUser(mockUserData);
+
+    expect(result).toEqual(createdUser);
+    expect(userRepository.create).toHaveBeenCalledWith(mockUserData);
+    expect(userRepository.create).toHaveBeenCalledTimes(1);
   });
 
-  test('deve criar usuário com dados válidos', () => {
-    const mockUser = createMockUser();
-    const createdUser = { id: 'uuid123', ...mockUser };
+  test('deve lançar um erro se o repositório falhar', async () => {
+    const dbError = new Error('DB error');
+    vi.mocked(userRepository.create).mockRejectedValue(dbError);
 
-    vi.mocked(userRepository.create).mockReturnValueOnce(createdUser);
+    await expect(userService.createUser(mockUserData)).rejects.toThrow(dbError);
 
-    const result = userService.createUser(mockUser);
-
-    expect(result.success).toBe(true);
-    expect(result.user).toMatchObject({
-      name: mockUser.name,
-      email: mockUser.email,
-    });
-    expect(result.user?.id).toEqual(expect.any(String));
-    expect(userRepository.create).toHaveBeenCalledWith(mockUser);
-  });
-
-  test('deve retornar erro de validação com email inválido', () => {
-    const invalidData = createMockUser({ email: 'invalid-email' });
-    const result = userService.createUser(invalidData);
-
-    expect(result.success).toBe(false);
-    expect(result.error?.fieldErrors).toHaveProperty('email');
-  });
-
-  test('deve retornar erro se nome estiver ausente', () => {
-    const invalidData = createMockUser({ name: '' });
-    const result = userService.createUser(invalidData);
-
-    expect(result.success).toBe(false);
-    expect(result.error?.fieldErrors).toHaveProperty('name');
-  });
-
-  test('deve lidar com erro do repositório', () => {
-    const validData = createMockUser();
-
-    vi.mocked(userRepository.create).mockImplementationOnce(() => {
-      throw new Error('DB error');
-    });
-
-    const result = userService.createUser(validData);
-
-    expect(result.success).toBe(false);
-    expect(result.error?.message).toBe('Failed to create user');
+    expect(userRepository.create).toHaveBeenCalledWith(mockUserData);
+    expect(userRepository.create).toHaveBeenCalledTimes(1);
   });
 });
+
+// NOTA: Os testes de validação (email inválido, nome ausente) foram removidos.
+// Na arquitetura deste projeto, a validação de dados de entrada é responsabilidade
+// da camada de rotas (Fastify com Zod), não da camada de serviço. O serviço
+// deve receber apenas dados já validados.
