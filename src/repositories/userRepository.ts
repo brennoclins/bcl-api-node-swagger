@@ -1,27 +1,18 @@
-import { randomUUID } from 'node:crypto';
-import type { IUser } from '../types';
-
-const users: IUser[] = [
-  {
-    id: randomUUID(),
-    name: 'Brenno',
-    email: 'brenno@bcl.com.br',
-  },
-];
+import { prisma } from '@lib/prisma.js';
+import type { IUser } from '../types.js';
 
 export const userRepository = {
-  findAll: (): IUser[] => users,
-  findById: (id: string): IUser | null => {
-    const user = users.find((u) => u.id === id);
-    return user || null;
+  async create(data: Omit<IUser, 'id'>): Promise<IUser> {
+    return prisma.user.create({
+      data,
+    });
   },
-  findByEmail: (email: string): IUser | null => {
-    const user = users.find((u) => u.email === email);
-    return user || null;
+
+  async findByEmail(email: string): Promise<IUser | null> {
+    return prisma.user.findUnique({ where: { email } });
   },
-  create: (userData: Omit<IUser, 'id'>): IUser => {
-    const newUser = { id: randomUUID(), ...userData };
-    users.push(newUser);
-    return newUser;
+
+  async findAll(): Promise<IUser[]> {
+    return prisma.user.findMany();
   },
 };

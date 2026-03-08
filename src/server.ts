@@ -11,7 +11,7 @@ import {
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
 import { ZodError } from 'zod';
-import { routes } from './routes';
+import { routes } from './routes.js';
 
 const PORT = Number(process.env.PORT) || 3333;
 

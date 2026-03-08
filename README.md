@@ -13,7 +13,7 @@ Este repositório é uma demonstração completa de como construir uma API REST 
 - **[Node.js](https://nodejs.org/) + [TypeScript](https://www.typescriptlang.org/)**: Base da aplicação, garantindo tipagem estática e segurança.
 - **[Fastify v5](https://fastify.dev/)**: Framework HTTP extremamente rápido e com um ecossistema moderno de plugins.
 - **[Zod](https://zod.dev/)**: Declaração de schemas e validação de dados. Integrado perfeitamente com o Fastify para tipagem na entrada e saída das rotas.
-- **[Swagger / OpenAPI](https://swagger.io/)**: Documentação interativa gerada automaticamente a partir dos schemas do Zod digitais nas rotas (`@fastify/swagger` e `@fastify/swagger-ui`).
+- **Swagger / OpenAPI**: Documentação interativa gerada automaticamente a partir dos schemas do Zod definidos nas rotas (`@fastify/swagger` e `@fastify/swagger-ui`).
 - **[Vitest](https://vitest.dev/)**: Framework de testes ultra-rápido, utilizado aqui para testes Unitários e testes End-to-End (E2E).
 - **[Biome](https://biomejs.dev/)**: Ferramenta rápida e moderna adotada para padronização, formatação e lint de código (substituindo Prettier + ESLint).
 - **[tsx](https://tsx.is/)**: Execução de TypeScript nativa para o ambiente de desenvolvimento.
@@ -23,33 +23,48 @@ Este repositório é uma demonstração completa de como construir uma API REST 
 O projeto segue uma arquitetura limpa em camadas para separação clara de responsabilidades:
 
 - `src/schemas`: Definição de todos os schemas (Zod). É aqui que validamos e tipamos os dados.
-- `src/repositories`: Camada de acesso aos dados. Atualmente utiliza um banco de dados em memória (um simples array) puro para demonstração de manipulação.
+- `src/repositories`: Camada de acesso aos dados. Utiliza o **Prisma ORM** para comunicação com o banco de dados.
 - `src/services`: Camada de regras de negócio, onde a lógica principal atua como ponte entre a entrada/saída HTTP e os repositórios de sistema.
 - `src/routes.ts`: Definições de rotas do Fastify integradas ao Zod para auto-validação (`fastify-type-provider-zod`).
 - `src/server.ts`: Configuração e Bootstrapping global da API, incluindo o Custom Error Handler para Erros de Validação.
 - `tests/`: Separação estrutural com testes End-to-End (`e2e/`) e Unitários (`services/`).
 
-## 🤖 Assistente de IA Auxiliando no Desenvolvimento
 
-Este projeto tira vantagem do uso de agentes e assistentes de IA diretamente no fluxo de código. As diretrizes de estrutura, validação explícita com o Zod, regras e convenções do time estão codificadas dentro do um arquivo `.clinerules`, garantindo que o desenvolvimento escalonado mantenha a essência arquitetural requerida.
+## ⚙️ Como Começar
 
-## ⚙️ Instruções para rodar o projeto
+Siga este guia passo a passo para configurar e executar o projeto em seu ambiente local. O fluxo foi pensado para ser claro tanto para iniciantes quanto para desenvolvedores experientes.
 
-### 🔧 Pré-requisitos
+### 1. Pré-requisitos
 
 - Node.js instalado (versão 20 ou superior recomendada)
-- Gerenciador de pacotes `npm` ou `pnpm`
-- VS Code (opcional, mas recomendado)
+- Gerenciador de pacotes `npm` (já vem com o Node.js)
 
-### 📦 Instalação
+### 2. Instalação
 
-Clone o projeto e instale as dependências:
+Primeiro, clone o repositório e instale as dependências do projeto.
 
 ```bash
+# Clone o projeto
 git clone https://github.com/brennoclins/bcl-api-node-swagger.git
+
+# Entre na pasta do projeto
 cd bcl-api-node-swagger
+
+# Instale as dependências
 npm install
 ```
+
+### 🚀 Configurando obanco de dados
+Monta a estrutura do banco de dados
+```bash
+ npm run prisma:migrate
+```
+Popule o banco** com dados iniciais (um usuário de exemplo)
+```bash
+ npm run prisma:seed
+```
+**⚠️ Importante:** O seed cria o usuário. Você precisará deste e-mail para fazer login na rota `POST /login` e obter o token JWT para acessar os endpoints protegidos.
+
 
 ### 🚀 Executando o Servidor de Desenvolvimento
 

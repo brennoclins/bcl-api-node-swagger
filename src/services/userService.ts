@@ -1,21 +1,18 @@
-import type { SafeParseReturnType } from 'zod';
-import { userRepository } from '../repositories/userRepository';
-import { createUserSchema } from '../schemas/userSchemas';
-import type { IUser } from '../types';
+import type { z } from 'zod';
+import { userRepository } from '../repositories/userRepository.js';
+import { createUserSchema } from '../schemas/userSchemas.js';
+
+type CreateUserDTO = z.infer<typeof createUserSchema>;
 
 export const userService = {
-  listUsers: (): IUser[] => userRepository.findAll(),
-  getUserById: (id: string): IUser | null => {
-    const user = userRepository.findById(id);
-    return user || null;
-  },
-  async createUser(data: unknown): Promise<IUser> {
-    const result = createUserSchema.safeParse(data);
+  async createUser(data: CreateUserDTO) {
+    const userAlreadyExists = await userRepository.findByEmail(data.email);
 
-    if (!result.success) {
-      throw result.error;
+    if (userAlreadyExists) {
+      throw new Error('User already exists');
     }
 
-    return userRepository.create(result.data);
+    // O ID é gerado automaticamente pelo banco de dados (Prisma + UUID)
+    return userRepository.create(data);
   },
 };

@@ -1,14 +1,14 @@
 import { z } from 'zod';
-import { userRepository } from './repositories/userRepository';
+import { userRepository } from './repositories/userRepository.js';
+import { loginSchema, tokenResponseSchema } from './schemas/authSchemas.js';
 import {
   createUserSchema,
   errorResponseSchema,
   userSchema,
   validationErrorSchema,
-} from './schemas/userSchemas';
-import { loginSchema, tokenResponseSchema } from './schemas/authSchemas';
-import { userService } from './services/userService';
-import type { FastifyTypeInstance } from './types';
+} from './schemas/userSchemas.js';
+import { userService } from './services/userService.js';
+import type { FastifyTypeInstance } from './types.js';
 
 export async function routes(app: FastifyTypeInstance) {
   app.post(
@@ -28,7 +28,7 @@ export async function routes(app: FastifyTypeInstance) {
     },
     async (request, reply) => {
       const { email } = request.body;
-      const user = userRepository.findByEmail(email);
+      const user = await userRepository.findByEmail(email);
 
       if (!user) {
         return reply.status(401).send({ error: 'Credenciais inválidas' });
@@ -86,7 +86,10 @@ export async function routes(app: FastifyTypeInstance) {
         const newUser = await userService.createUser(request.body);
         return reply.status(201).send(newUser);
       } catch (error) {
-        app.log.error(error);
+        if (error instanceof Error && error.message === 'User already exists') {
+          return reply.status(409).send({ error: error.message });
+        }
+        app.log.error(error, 'Error creating user');
         return reply.status(500).send({ error: 'Internal server error' });
       }
     },

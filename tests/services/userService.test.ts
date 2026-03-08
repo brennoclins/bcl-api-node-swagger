@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { userRepository } from '../../src/repositories/userRepository';
-import { userService } from '../../src/services/userService';
+import { userRepository } from '../../src/repositories/userRepository.js';
+import { userService } from '../../src/services/userService.js';
+import type { IUser } from '../../src/types.js';
 
-vi.mock('../../src/repositories/userRepository', () => ({
+vi.mock('../../src/repositories/userRepository.js', () => ({
   userRepository: {
     create: vi.fn(),
+    findByEmail: vi.fn(),
   },
 }));
 
@@ -19,24 +21,32 @@ describe('User Service - createUser', () => {
   };
 
   test('deve criar um usuário e retorná-lo com sucesso', async () => {
+    // Arrange
+    vi.mocked(userRepository.findByEmail).mockResolvedValue(null);
     const createdUser = { id: 'uuid123', ...mockUserData };
     vi.mocked(userRepository.create).mockResolvedValue(createdUser);
 
+    // Act
     const result = await userService.createUser(mockUserData);
 
+    // Assert
     expect(result).toEqual(createdUser);
+    expect(userRepository.findByEmail).toHaveBeenCalledWith(mockUserData.email);
     expect(userRepository.create).toHaveBeenCalledWith(mockUserData);
     expect(userRepository.create).toHaveBeenCalledTimes(1);
   });
 
-  test('deve lançar um erro se o repositório falhar', async () => {
-    const dbError = new Error('DB error');
-    vi.mocked(userRepository.create).mockRejectedValue(dbError);
+  test('deve lançar um erro se o usuário já existir', async () => {
+    // Arrange
+    const existingUser: IUser = { id: 'uuid-existente', ...mockUserData };
+    vi.mocked(userRepository.findByEmail).mockResolvedValue(existingUser);
 
-    await expect(userService.createUser(mockUserData)).rejects.toThrow(dbError);
+    // Act & Assert
+    await expect(userService.createUser(mockUserData)).rejects.toThrow('User already exists');
 
-    expect(userRepository.create).toHaveBeenCalledWith(mockUserData);
-    expect(userRepository.create).toHaveBeenCalledTimes(1);
+    // Assert
+    expect(userRepository.findByEmail).toHaveBeenCalledWith(mockUserData.email);
+    expect(userRepository.create).not.toHaveBeenCalled();
   });
 });
 

@@ -1,7 +1,7 @@
 import type {
   FastifyBaseLogger,
   FastifyInstance,
-  type preHandlerHookHandler,
+  preHandlerHookHandler,
   RawReplyDefaultExpression,
   RawRequestDefaultExpression,
   RawServerDefault,

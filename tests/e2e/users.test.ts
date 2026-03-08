@@ -1,8 +1,6 @@
-import { randomUUID } from 'node:crypto';
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import { userRepository } from '../../src/repositories/userRepository';
-import { build } from '../../src/server';
-import type { IUser } from '../../src/types';
+import { prisma } from '@lib/prisma.js';
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
+import { build } from '../../src/server.js';
 
 describe('POST /users', () => {
   const testApp = build();
@@ -15,18 +13,16 @@ describe('POST /users', () => {
 
   beforeAll(async () => {
     await testApp.ready();
-    vi.spyOn(userRepository, 'create').mockImplementation((data: Omit<IUser, 'id'>) => ({
-      id: randomUUID(),
-      ...data,
-    }));
-
-    // Gera um token válido pare os testes
+    // Gera um token válido para os testes
     token = testApp.jwt.sign({ sub: 'user123', name: 'Tester' }, { expiresIn: '1h' });
+  });
+
+  afterEach(async () => {
+    await prisma.user.deleteMany(); // Limpa a tabela de usuários após cada teste
   });
 
   afterAll(async () => {
     await testApp.close();
-    vi.restoreAllMocks();
   });
 
   test('Deve retornar 201 com dados válidos', async () => {
@@ -42,6 +38,27 @@ describe('POST /users', () => {
       id: expect.any(String),
       ...mockUser,
     });
+  });
+
+  test('Deve retornar 409 se o usuário já existir', async () => {
+    // Cria o usuário uma vez
+    await testApp.inject({
+      method: 'POST',
+      url: '/users',
+      headers: { authorization: `Bearer ${token}` },
+      payload: mockUser,
+    });
+
+    // Tenta criar o mesmo usuário novamente
+    const response = await testApp.inject({
+      method: 'POST',
+      url: '/users',
+      headers: { authorization: `Bearer ${token}` },
+      payload: mockUser,
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toHaveProperty('error', 'User already exists');
   });
 
   test('Deve retornar 400 sem nome', async () => {
