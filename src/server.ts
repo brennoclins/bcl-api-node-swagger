@@ -64,10 +64,18 @@ export function build() {
     }
 
     // Trata erros de cliente (como os do JWT) que já vêm com statusCode
-    if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'statusCode' in error &&
+      typeof error.statusCode === 'number' &&
+      error.statusCode >= 400 &&
+      error.statusCode < 500
+    ) {
       app.log.warn(error);
+      const message = 'message' in error ? String(error.message) : 'Client Error';
       return reply.status(error.statusCode).send({
-        error: error.message,
+        error: message,
       });
     }
 

@@ -5,7 +5,7 @@ const users: IUser[] = [
   {
     id: randomUUID(),
     name: 'Brenno',
-    email: 'b@bcl.com',
+    email: 'brenno@bcl.com.br',
   },
 ];
 
