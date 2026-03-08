@@ -1,6 +1,7 @@
 import type {
   FastifyBaseLogger,
   FastifyInstance,
+  type preHandlerHookHandler,
   RawReplyDefaultExpression,
   RawRequestDefaultExpression,
   RawServerDefault,
@@ -26,7 +27,7 @@ declare module '@fastify/jwt' {
 
 declare module 'fastify' {
   interface FastifyInstance {
-    authenticate: any;
+    authenticate: preHandlerHookHandler;
   }
 }
 

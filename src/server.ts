@@ -2,7 +2,7 @@ import { fastifyCors } from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
 import { fastifySwagger } from '@fastify/swagger';
 import { fastifySwaggerUi } from '@fastify/swagger-ui';
-import { fastify } from 'fastify';
+import { type FastifyReply, type FastifyRequest, fastify } from 'fastify';
 import {
   hasZodFastifySchemaValidationErrors,
   jsonSchemaTransform,
@@ -63,6 +63,14 @@ export function build() {
       });
     }
 
+    // Trata erros de cliente (como os do JWT) que já vêm com statusCode
+    if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
+      app.log.warn(error);
+      return reply.status(error.statusCode).send({
+        error: error.message,
+      });
+    }
+
     app.log.error(error); // Log unexpected errors
     return reply.status(500).send({ message: 'Internal Server Error' });
   });
@@ -95,12 +103,8 @@ export function build() {
     secret: process.env.JWT_SECRET || 'supersecret', // Use dotenv se preferir
   });
 
-  app.decorate('authenticate', async (request: any, reply: any) => {
-    try {
-      await request.jwtVerify();
-    } catch (err) {
-      reply.send(err);
-    }
+  app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
+    await request.jwtVerify();
   });
 
   // Rotas
