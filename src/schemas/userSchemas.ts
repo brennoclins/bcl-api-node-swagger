@@ -11,6 +11,15 @@ export const createUserSchema = z.object({
   email: z.string().email(),
 });
 
+export const updateUserSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email().optional(),
+});
+
+export const userParamsSchema = z.object({
+  id: z.string().uuid('O ID do usuário deve ser um UUID válido.'),
+});
+
 export const errorResponseSchema = z.object({
   error: z.string().describe('Error message'),
 });
