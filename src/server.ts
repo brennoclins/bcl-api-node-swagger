@@ -22,7 +22,7 @@ export function build() {
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
-  app.setErrorHandler((error, _, reply) => {
+  app.setErrorHandler((error, request, reply) => {
     if (error instanceof ZodError) {
       return reply.status(400).send({ error: error.flatten() });
     }
@@ -63,6 +63,13 @@ export function build() {
       });
     }
 
+    // NEW: Handle JSON parsing errors specifically
+    if (error instanceof SyntaxError && 'statusCode' in error && error.statusCode === 400) {
+      // Fastify's body parser often sets statusCode to 400 for JSON parsing errors
+      app.log.warn(error, 'JSON parsing error');
+      return reply.status(400).send({ error: 'Invalid JSON payload' });
+    }
+
     // Trata erros de cliente (como os do JWT) que já vêm com statusCode
     if (
       error &&
@@ -79,8 +86,8 @@ export function build() {
       });
     }
 
-    app.log.error(error); // Log unexpected errors
-    return reply.status(500).send({ message: 'Internal Server Error' });
+    app.log.error(error, 'Internal server error'); // Log unexpected errors with more context
+    return reply.status(500).send({ error: 'Internal server error' }); // Changed message to 'error' for consistency
   });
 
   // Plugins
